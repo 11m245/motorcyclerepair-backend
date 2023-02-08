@@ -4,6 +4,8 @@ import { MongoClient } from "mongodb";
 dotenv.config();
 import cors from "cors";
 import userRouter from "./routes/user.routes.js";
+import servicesRouter from "./routes/services.routes.js";
+import serviceCategoriesRouter from "./routes/serviceCategories.routes.js";
 
 const app = express(); //invoke the express and get the app object
 const PORT = process.env.PORT;
@@ -22,3 +24,5 @@ app.get("/", function (request, response) {
 });
 
 app.use("/user", userRouter);
+app.use("/services", servicesRouter);
+app.use("/serviceCategories", serviceCategoriesRouter);

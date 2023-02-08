@@ -124,3 +124,22 @@ export async function makeResetTokenExpire(resetToken) {
       { $set: { isExpired: true } }
     );
 }
+
+export async function getUserIdFromLoginToken(logintoken) {
+  return await client
+    .db("motorCycleRepairApp")
+    .collection("userTokens")
+    .findOne({
+      $and: [{ type: "login" }, { token: logintoken }, { isExpired: false }],
+    });
+}
+
+export async function makeLoginTokenExpire(logintoken) {
+  return await client
+    .db("motorCycleRepairApp")
+    .collection("userTokens")
+    .updateOne(
+      { $and: [{ type: "login" }, { token: logintoken }] },
+      { $set: { isExpired: true } }
+    );
+}

@@ -7,7 +7,9 @@ import {
   getUserFromActivationToken,
   getUserFromDBByEmail,
   getUserFromObjectID,
+  getUserIdFromLoginToken,
   getUserIdFromResetToken,
+  makeLoginTokenExpire,
   makeResetTokenExpire,
   saveActivationTokenInDB,
   saveLoginToken,
@@ -294,5 +296,30 @@ router.post("/change-password", async function (request, response) {
   } else {
     response.status(400).send({ message: "unauthorised Usage" });
   }
+});
+
+router.get("/getUserNameImage", async function (request, response) {
+  const { logintoken } = request.headers;
+  // console.log("reset token is", resettoken);
+  const tokenedUser = await getUserIdFromLoginToken(logintoken);
+  if (tokenedUser) {
+    const user = await getUserFromObjectID(tokenedUser.userId);
+    // console.log("user is", user);
+    response.send({
+      message: "user details fetched",
+      payload: { name: user.name },
+    });
+  } else {
+    response.status(400).send({ message: "Unauthorised Usage" });
+  }
+});
+
+router.post("/makeLoginTokenExpire", async function (request, response) {
+  const { logintoken } = request.headers;
+
+  const result = await makeLoginTokenExpire(logintoken);
+  result.modifiedCount > 0
+    ? response.send({ message: "token expired" })
+    : response.status(500).send({ message: "error token not expired" });
 });
 export default router;

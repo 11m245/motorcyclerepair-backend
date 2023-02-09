@@ -22,6 +22,13 @@ export async function getUserFromObjectID(id) {
     .findOne({ _id: id });
 }
 
+export async function getWorkshopFromObjectID(id) {
+  return await client
+    .db("motorCycleRepairApp")
+    .collection("users")
+    .findOne({ role: "workshop", _id: id });
+}
+
 export async function saveActivationTokenInDB(userFromDB, token) {
   const formattedData = {
     userId: userFromDB._id,
@@ -142,4 +149,23 @@ export async function makeLoginTokenExpire(logintoken) {
       { $and: [{ type: "login" }, { token: logintoken }] },
       { $set: { isExpired: true } }
     );
+}
+
+export async function getWorkshopsForPincode(pincode) {
+  return await client
+    .db("motorCycleRepairApp")
+    .collection("users")
+    .find(
+      { $and: [{ role: "workshop" }, { pins: pincode }] },
+      { projection: { password: 0, isActivated: 0 } }
+    )
+    .toArray();
+}
+
+export async function getAllWorkshops() {
+  return await client
+    .db("motorCycleRepairApp")
+    .collection("users")
+    .find({ role: "workshop" }, { projection: { password: 0, isActivated: 0 } })
+    .toArray();
 }

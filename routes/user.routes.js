@@ -3,12 +3,14 @@ import {
   activateUserInDB,
   addUserInDB,
   checkUserAlreadyExist,
+  getAllWorkshops,
   getUserActivationTokenFromObjectID,
   getUserFromActivationToken,
   getUserFromDBByEmail,
   getUserFromObjectID,
   getUserIdFromLoginToken,
   getUserIdFromResetToken,
+  getWorkshopsForPincode,
   makeLoginTokenExpire,
   makeResetTokenExpire,
   saveActivationTokenInDB,
@@ -105,6 +107,7 @@ router.post("/signup", async function (request, response) {
           : {
               ...dataWOCP,
               pins: pinsArray,
+              rating: 0,
               isActivated: false,
               password: await generateHashedPassword(dataWOCP.password),
             };
@@ -322,4 +325,39 @@ router.post("/makeLoginTokenExpire", async function (request, response) {
     ? response.send({ message: "token expired" })
     : response.status(500).send({ message: "error token not expired" });
 });
+
+// router.get("/pin", async function (request, response) {
+//   const { logintoken } = request.headers;
+//   const tokenedUser = await getUserIdFromLoginToken(logintoken);
+//   if (tokenedUser) {
+//     const user = await getUserFromObjectID(tokenedUser.userId);
+//     // console.log("user is", user);
+//     response.send({
+//       message: "user pin fetched",
+//       payload: user.pin,
+//     });
+//   } else {
+//     response.status(400).send({ message: "Unauthorised Usage" });
+//   }
+// });
+
+router.get("/pinWorkshop", async function (request, response) {
+  const { logintoken, pin } = request.headers;
+  const tokenedUser = await getUserIdFromLoginToken(logintoken);
+  if (tokenedUser) {
+    const user = await getUserFromObjectID(tokenedUser.userId);
+    // console.log("user is", user);
+    const workshops = user.pin
+      ? await getWorkshopsForPincode(user.pin)
+      : await getAllWorkshops();
+    console.log("workshops", workshops);
+    response.send({
+      message: "user pin workshops fetched",
+      payload: workshops,
+    });
+  } else {
+    response.status(400).send({ message: "Unauthorised Usage" });
+  }
+});
+
 export default router;

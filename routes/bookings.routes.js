@@ -38,7 +38,7 @@ router.post("/new", async function (request, response) {
       ],
     };
     const result = await addBooking(formattedData);
-    console.log("add book res", result);
+    // console.log("add book res", result);
     if (result.acknowledged) {
       response.send({ message: "booked succesfully" });
     } else {
@@ -77,7 +77,7 @@ router.post("/updateStatus/:newStatusCode", async function (request, response) {
   const { logintoken } = request.headers;
   const { newStatusCode } = request.params;
   const { bookingId } = request.body;
-  console.log("body booking id", bookingId, newStatusCode);
+  // console.log("body booking id", bookingId, newStatusCode);
   const tokenedUser = await getUserIdFromLoginToken(logintoken);
   const booking = await getBookingById(new ObjectId(bookingId));
   if (booking) {

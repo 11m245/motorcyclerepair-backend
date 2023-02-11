@@ -33,7 +33,7 @@ function checkValidSignupData(data) {
     password.length > 7 &&
     password === cpassword;
 
-  console.log("isValid input", validStatus);
+  // console.log("isValid input", validStatus);
   return validStatus;
 }
 
@@ -48,7 +48,7 @@ async function generateActivationToken(userFromDB) {
     { userFromDB, date: Date.now() },
     process.env.SECRET_ACTIVATION_KEY
   );
-  console.log("generated token is", token);
+  // console.log("generated token is", token);
   return token;
 }
 
@@ -78,9 +78,9 @@ async function mailActivationLink(userActivationInfo, activationtoken) {
 
 router.post("/signup", async function (request, response) {
   const data = request.body;
-  console.log(data);
+  // console.log(data);
   const isUserExist = await checkUserAlreadyExist(data);
-  console.log("isUserExist", isUserExist);
+  // console.log("isUserExist", isUserExist);
   if (isUserExist) {
     response.status(400).send({ message: "Already User Exist on this email" });
   } else {
@@ -89,7 +89,7 @@ router.post("/signup", async function (request, response) {
       if (data.role === "user") {
       }
       const { cpassword, pin, pins, ...dataWOCP } = data;
-      console.log("wocp", dataWOCP); //skipping confirm password
+      // console.log("wocp", dataWOCP); //skipping confirm password
       let pinsArray = [];
       if (data.role === "workshop") {
         pinsArray = data.pins.split(",");
@@ -112,20 +112,20 @@ router.post("/signup", async function (request, response) {
               password: await generateHashedPassword(dataWOCP.password),
             };
 
-      console.log("formatted data", formattedData);
+      // console.log("formatted data", formattedData);
       const result = await addUserInDB(formattedData);
-      console.log("res", result);
+      // console.log("res", result);
       if (result.acknowledged) {
-        console.log("0 inserted id is", result.insertedId);
+        // console.log("0 inserted id is", result.insertedId);
         const userFromDB = await getUserFromObjectID(result.insertedId);
-        console.log("1 userFromDB is", userFromDB);
+        // console.log("1 userFromDB is", userFromDB);
         const activationToken = await generateActivationToken(userFromDB);
-        console.log("2 activationToken is", activationToken);
+        // console.log("2 activationToken is", activationToken);
         const saveTokenResult = await saveActivationTokenInDB(
           userFromDB,
           activationToken
         );
-        console.log("3 saveToken result is", saveTokenResult);
+        // console.log("3 saveToken result is", saveTokenResult);
         await mailActivationLink(userFromDB, activationToken);
 
         response.send({
@@ -234,13 +234,13 @@ async function generateResetToken(userFromDB) {
     { userFromDB, date: Date.now() },
     process.env.SECRET_ACTIVATION_KEY
   );
-  console.log("generated reset token is", token);
+  // console.log("generated reset token is", token);
   return token;
 }
 
 router.post("/sendResetLink", async function (request, response) {
   const data = request.body;
-  console.log(data);
+  // console.log(data);
   const userFromDB = await getUserFromDBByEmail(data.email);
   if (userFromDB) {
     const resetToken = await generateResetToken(userFromDB);
@@ -278,16 +278,16 @@ router.get("/getInfoFromResetToken", async function (request, response) {
 router.post("/change-password", async function (request, response) {
   const { resettoken } = request.headers;
   const data = request.body;
-  console.log(data);
+  // console.log(data);
   const tokenedUser = await getUserIdFromResetToken(resettoken);
   const userFromDB = await getUserFromObjectID(tokenedUser.userId);
-  console.log("usersssss", userFromDB);
+  // console.log("usersssss", userFromDB);
   if (data.email === userFromDB.email) {
     if (data.password === data.cpassword) {
       const newPassword = await generateHashedPassword(data.password);
       const result = await updatePasswordInDB(data.email, newPassword);
       await makeResetTokenExpire(resettoken);
-      console.log("password change result", result);
+      // console.log("password change result", result);
       if (result.modifiedCount === 1) {
         response.send({ message: "Password Change Success" });
       } else {
@@ -350,7 +350,7 @@ router.get("/pinWorkshop", async function (request, response) {
     const workshops = user.pin
       ? await getWorkshopsForPincode(user.pin)
       : await getAllWorkshops();
-    console.log("workshops", workshops);
+    // console.log("workshops", workshops);
     response.send({
       message: "user pin workshops fetched",
       payload: workshops,

@@ -73,7 +73,7 @@ export async function getBookingById(id) {
 
 export async function updateNewBookingStatus(newStatus, bookingId) {
   if (newStatus.statusCode === "05") {
-    console.log("if runs 05", newStatus, bookingId);
+    // console.log("if runs 05", newStatus, bookingId);
     await client
       .db("motorCycleRepairApp")
       .collection("bookings")

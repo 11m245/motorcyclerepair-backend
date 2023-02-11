@@ -3,6 +3,9 @@ import { ObjectId } from "mongodb";
 import {
   addBooking,
   getAllBookingsFromId,
+  getAllWorkshopBookingsFromId,
+  getBookingById,
+  updateNewBookingStatus,
 } from "../services/bookings.services.js";
 import {
   getUserFromObjectID,
@@ -55,6 +58,47 @@ router.get("/getAllUserBookings", async function (request, response) {
     response.send({ message: "user bookings fetched", payload: res });
   } else {
     response.status(500).send({ message: "no bookings" });
+  }
+});
+
+router.get("/workshopBookings", async function (request, response) {
+  const { logintoken } = request.headers;
+  const tokenedUser = await getUserIdFromLoginToken(logintoken);
+  // console.log("workshop bookings tokened user", tokenedUser);
+  const res = await getAllWorkshopBookingsFromId(tokenedUser.userId);
+  // console.log("workshop booings res", res);
+  if (res.length > 0) {
+    response.send({ message: "workshop bookings fetched", payload: res });
+  } else {
+    response.status(500).send({ message: "no workshop bookings" });
+  }
+});
+router.post("/updateStatus/:newStatusCode", async function (request, response) {
+  const { logintoken } = request.headers;
+  const { newStatusCode } = request.params;
+  const { bookingId } = request.body;
+  console.log("body booking id", bookingId, newStatusCode);
+  const tokenedUser = await getUserIdFromLoginToken(logintoken);
+  const booking = await getBookingById(new ObjectId(bookingId));
+  if (booking) {
+    // console.log("booking exist");
+    const newStatus = {
+      statusCode: newStatusCode,
+      updatedBy: tokenedUser.userId,
+      updatedAt: Date.now(),
+    };
+    const updateResult = await updateNewBookingStatus(
+      newStatus,
+      new ObjectId(bookingId)
+    );
+    // console.log("status update result is", updateResult);
+    if (updateResult.modifiedCount > 0) {
+      response.send("New Status Updated Successfully");
+    } else {
+      response.status(500).send("Unable to update the status");
+    }
+  } else {
+    response.status(400).send("Unauthorised Usage");
   }
 });
 export default router;

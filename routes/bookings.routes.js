@@ -53,6 +53,9 @@ router.get("/getAllUserBookings", async function (request, response) {
   const data = request.body;
   const { logintoken } = request.headers;
   const tokenedUser = await getUserIdFromLoginToken(logintoken);
+  if (!tokenedUser) {
+    response.status(400).send("Unauthorised Usage");
+  }
   const res = await getAllBookingsFromId(tokenedUser.userId);
   if (res.length > 0) {
     response.send({ message: "user bookings fetched", payload: res });
@@ -64,6 +67,9 @@ router.get("/getAllUserBookings", async function (request, response) {
 router.get("/workshopBookings", async function (request, response) {
   const { logintoken } = request.headers;
   const tokenedUser = await getUserIdFromLoginToken(logintoken);
+  if (!tokenedUser) {
+    response.status(400).send("Unauthorised Usage");
+  }
   // console.log("workshop bookings tokened user", tokenedUser);
   const res = await getAllWorkshopBookingsFromId(tokenedUser.userId);
   // console.log("workshop booings res", res);
@@ -79,6 +85,9 @@ router.post("/updateStatus/:newStatusCode", async function (request, response) {
   const { bookingId } = request.body;
   // console.log("body booking id", bookingId, newStatusCode);
   const tokenedUser = await getUserIdFromLoginToken(logintoken);
+  if (!tokenedUser) {
+    response.status(400).send("Unauthorised Usage");
+  }
   const booking = await getBookingById(new ObjectId(bookingId));
   if (booking) {
     // console.log("booking exist");

@@ -68,7 +68,7 @@ router.get("/workshopBookings", async function (request, response) {
   const { logintoken } = request.headers;
   const tokenedUser = await getUserIdFromLoginToken(logintoken);
   if (!tokenedUser) {
-    response.status(400).send("Unauthorised Usage");
+    response.status(400).send({ message: "Unauthorised Usage" });
   }
   // console.log("workshop bookings tokened user", tokenedUser);
   const res = await getAllWorkshopBookingsFromId(tokenedUser.userId);
@@ -102,12 +102,12 @@ router.post("/updateStatus/:newStatusCode", async function (request, response) {
     );
     // console.log("status update result is", updateResult);
     if (updateResult.modifiedCount > 0) {
-      response.send("New Status Updated Successfully");
+      response.send({ message: "New Status Updated Successfully" });
     } else {
-      response.status(500).send("Unable to update the status");
+      response.status(500).send({ message: "Unable to update the status" });
     }
   } else {
-    response.status(400).send("Unauthorised Usage");
+    response.status(400).send({ message: "Unauthorised Usage" });
   }
 });
 export default router;

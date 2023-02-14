@@ -156,7 +156,9 @@ export async function getWorkshopsForPincode(pincode) {
     .db("motorCycleRepairApp")
     .collection("users")
     .find(
-      { $and: [{ role: "workshop" }, { pins: pincode }] },
+      {
+        $and: [{ role: "workshop" }, { isActivated: true }, { pins: pincode }],
+      },
       { projection: { password: 0, isActivated: 0 } }
     )
     .toArray();
@@ -168,4 +170,68 @@ export async function getAllWorkshops() {
     .collection("users")
     .find({ role: "workshop" }, { projection: { password: 0, isActivated: 0 } })
     .toArray();
+}
+
+export async function getUserProfileFromId(id) {
+  return await client
+    .db("motorCycleRepairApp")
+    .collection("users")
+    .findOne({ _id: id, role: "user" }, { projection: { password: 0 } });
+}
+
+export async function getWorkshopProfileFromId(id) {
+  return await client
+    .db("motorCycleRepairApp")
+    .collection("users")
+    .findOne({ _id: id, role: "workshop" }, { projection: { password: 0 } });
+}
+
+export async function updateUserDetails(id, newData) {
+  return await client
+    .db("motorCycleRepairApp")
+    .collection("users")
+    .updateOne(
+      {
+        $and: [
+          { role: "user" },
+          { email: newData.email },
+          { _id: id },
+          { isActivated: true },
+        ],
+      },
+      {
+        $set: {
+          name: newData.name,
+          mobile: newData.mobile,
+          password: newData.password,
+          address: newData.address,
+          pin: newData.pin,
+        },
+      }
+    );
+}
+
+export async function updateWorkshopDetails(id, newData) {
+  return await client
+    .db("motorCycleRepairApp")
+    .collection("users")
+    .updateOne(
+      {
+        $and: [
+          { role: "workshop" },
+          { email: newData.email },
+          { _id: id },
+          { isActivated: true },
+        ],
+      },
+      {
+        $set: {
+          name: newData.name,
+          mobile: newData.mobile,
+          password: newData.password,
+          address: newData.address,
+          pins: newData.pins,
+        },
+      }
+    );
 }

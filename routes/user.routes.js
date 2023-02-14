@@ -10,6 +10,8 @@ import {
   getUserFromObjectID,
   getUserIdFromLoginToken,
   getUserIdFromResetToken,
+  getUserProfileFromId,
+  getWorkshopProfileFromId,
   getWorkshopsForPincode,
   makeLoginTokenExpire,
   makeResetTokenExpire,
@@ -17,6 +19,8 @@ import {
   saveLoginToken,
   saveResetTokenInDB,
   updatePasswordInDB,
+  updateUserDetails,
+  updateWorkshopDetails,
 } from "../services/user.services.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
@@ -355,6 +359,96 @@ router.get("/pinWorkshop", async function (request, response) {
       message: "user pin workshops fetched",
       payload: workshops,
     });
+  } else {
+    response.status(400).send({ message: "Unauthorised Usage" });
+  }
+});
+
+router.get("/profile", async function (request, response) {
+  const { logintoken } = request.headers;
+  const tokenedUser = await getUserIdFromLoginToken(logintoken);
+  if (tokenedUser) {
+    const user = await getUserFromObjectID(tokenedUser.userId);
+    // console.log("profile login user is", user);
+    const profile =
+      user.role === "user"
+        ? await getUserProfileFromId(user._id)
+        : await getWorkshopProfileFromId(user._id);
+    // console.log("profile", profile);
+    response.send({
+      message: "user profile fetched",
+      payload: profile,
+    });
+  } else {
+    response.status(400).send({ message: "Unauthorised Usage" });
+  }
+});
+
+router.put("/updateUserProfile", async function (request, response) {
+  const { logintoken } = request.headers;
+  const data = request.body;
+  const tokenedUser = await getUserIdFromLoginToken(logintoken);
+  if (tokenedUser) {
+    const user = await getUserFromObjectID(tokenedUser.userId);
+    if (user.email === data.email) {
+      // console.log("profile login user is", user);
+      if (data.password === data.cpassword) {
+        const hashedPassword = await generateHashedPassword(data.password);
+        const { password, cpassword, ...dataWOP } = data;
+        const res = await updateUserDetails(user._id, {
+          ...dataWOP,
+          password: hashedPassword,
+        });
+        // console.log("update profile res is", res);
+        if (res.modifiedCount > 0) {
+          response.send({
+            message: "User Updated, use the New credentials for login",
+          });
+        } else {
+          response.status(500).send({ message: "Can't update User Details" });
+        }
+      } else {
+        response.status(400).send({ message: "Passwords not matched" });
+      }
+    } else {
+      response.status(400).send({ message: "Wrong User" });
+    }
+  } else {
+    response.status(400).send({ message: "Unauthorised Usage" });
+  }
+});
+
+router.put("/updateWorkshopProfile", async function (request, response) {
+  const { logintoken } = request.headers;
+  const data = request.body;
+  const tokenedUser = await getUserIdFromLoginToken(logintoken);
+  if (tokenedUser) {
+    const user = await getUserFromObjectID(tokenedUser.userId);
+    if (user.email === data.email) {
+      // console.log("profile login user is", user);
+      if (data.password === data.cpassword) {
+        const hashedPassword = await generateHashedPassword(data.password);
+        const { password, cpassword, ...dataWOP } = data;
+        const res = await updateWorkshopDetails(user._id, {
+          ...dataWOP,
+          password: hashedPassword,
+        });
+        // console.log("update workshop profile res is", res);
+        if (res.modifiedCount > 0) {
+          response.send({
+            message: "Workshop Updated, use the New credentials for login",
+          });
+        } else {
+          response
+            .status(500)
+            .send({ message: "Can't update Workshop Details" });
+        }
+      } else {
+        response.status(400).send({ message: "Passwords not matched" });
+      }
+    } else {
+      response.status(400).send({ message: "Wrong Workshop User" });
+    }
   } else {
     response.status(400).send({ message: "Unauthorised Usage" });
   }

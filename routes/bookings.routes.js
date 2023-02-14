@@ -79,7 +79,7 @@ router.get("/workshopBookings", async function (request, response) {
     response.status(500).send({ message: "no workshop bookings" });
   }
 });
-router.post("/updateStatus/:newStatusCode", async function (request, response) {
+router.put("/updateStatus/:newStatusCode", async function (request, response) {
   const { logintoken } = request.headers;
   const { newStatusCode } = request.params;
   const { bookingId } = request.body;

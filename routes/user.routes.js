@@ -314,7 +314,7 @@ router.get("/getUserNameImage", async function (request, response) {
     // console.log("user is", user);
     response.send({
       message: "user details fetched",
-      payload: { name: user.name },
+      payload: { name: user.name, role: user.role },
     });
   } else {
     response.status(400).send({ message: "Unauthorised Usage" });

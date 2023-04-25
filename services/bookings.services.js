@@ -24,6 +24,7 @@ export async function getAllBookingsFromId(id) {
           as: "workshop",
         },
       },
+      { $unwind: "$workshop" },
       {
         $project: {
           "workshop.password": 0,
@@ -53,6 +54,7 @@ export async function getAllWorkshopBookingsFromId(id) {
           as: "user",
         },
       },
+      { $unwind: "$user" },
       {
         $project: {
           "user.password": 0,

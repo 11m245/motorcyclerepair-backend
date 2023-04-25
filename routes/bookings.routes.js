@@ -16,6 +16,7 @@ const router = express.Router();
 
 router.post("/new", async function (request, response) {
   const data = request.body;
+  // console.log("booking received body data ", data);
   const { logintoken } = request.headers;
 
   const tokenedUser = await getUserIdFromLoginToken(logintoken);
@@ -25,8 +26,12 @@ router.post("/new", async function (request, response) {
       new ObjectId(data.workshopId)
     );
     // console.log("booked workshop ", workshop);
+    const invoiceAmount = data.selectedCartItems.reduce((acc, obj) => {
+      return acc + parseFloat(obj.charge);
+    }, 0);
     const formattedData = {
       ...data,
+      invoiceAmount: invoiceAmount,
       workshopId: workshop._id,
       bookedBy: user._id,
       createdAt: Date.now(),

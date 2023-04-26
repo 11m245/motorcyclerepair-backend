@@ -429,8 +429,14 @@ router.put("/updateWorkshopProfile", async function (request, response) {
       if (data.password === data.cpassword) {
         const hashedPassword = await generateHashedPassword(data.password);
         const { password, cpassword, ...dataWOP } = data;
+        let pinsArray = [];
+        if (data.role === "workshop") {
+          pinsArray = dataWOP.pins.split(",");
+        }
+
         const res = await updateWorkshopDetails(user._id, {
           ...dataWOP,
+          pins: pinsArray,
           password: hashedPassword,
         });
         // console.log("update workshop profile res is", res);
